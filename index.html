@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluación Vocacional | Sistematización Profesional</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #1a252f;
+            --accent: #3498db;
+            --bg: #f0f4f8;
+            --white: #ffffff;
+            --text: #2c3e50;
+            --border: #e1e8ed;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            background-color: var(--bg); 
+            color: var(--text); 
+            margin: 0; 
+            padding: 0;
+        }
+
+        .container { max-width: 850px; margin: 30px auto; padding: 0 20px; }
+
+        /* Encabezado */
+        .main-header { 
+            text-align: center; 
+            background: var(--primary); 
+            color: white; 
+            padding: 45px 20px; 
+            border-radius: 12px 12px 0 0;
+        }
+        
+        .main-header h1 { margin: 0; font-size: 1.8rem; letter-spacing: 0.5px; }
+        .meta-tag { font-size: 0.8rem; opacity: 0.7; margin-top: 10px; text-transform: uppercase; letter-spacing: 1.5px; }
+
+        /* Tarjetas */
+        .card { 
+            background: var(--white); 
+            padding: 30px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .card-title { 
+            color: var(--accent); 
+            margin-top: 0; 
+            margin-bottom: 18px; 
+            font-size: 1.3rem;
+            border-bottom: 2px solid var(--bg);
+            padding-bottom: 12px;
+        }
+
+        /* Inputs */
+        .input-group { margin-bottom: 18px; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.95rem; }
+        
+        input[type="text"], input[type="email"], input[type="number"] { 
+            width: 100%; padding: 12px; border: 1px solid #ced4da; border-radius: 8px; 
+            font-size: 1rem; box-sizing: border-box; transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px rgba(52,152,219,0.15); }
+
+        /* Preguntas */
+        .question-card { background: var(--white); padding: 25px; border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--border); }
+        .question-text { font-weight: 600; margin-bottom: 15px; display: block; font-size: 1.05rem; line-height: 1.4; }
+        
+        .options { display: flex; flex-direction: column; gap: 10px; }
+        .option { 
+            display: flex; align-items: center; padding: 12px; 
+            border: 1px solid #f0f4f8; border-radius: 8px; cursor: pointer; transition: background 0.2s;
+        }
+        .option:hover { background: #f8f9fa; border-color: var(--accent); }
+        .option input { margin-right: 12px; width: 18px; height: 18px; cursor: pointer; }
+
+        /* Botones */
+        .btn { 
+            background: var(--accent); color: white; border: none; padding: 18px; 
+            border-radius: 10px; font-size: 1.1rem; font-weight: bold; width: 100%;
+            cursor: pointer; transition: all 0.3s; margin-top: 10px;
+        }
+        .btn:hover { background: #2980b9; transform: translateY(-1px); box-shadow: 0 5px 12px rgba(0,0,0,0.1); }
+
+        /* Resultados */
+        #test-section, #result-section { display: none; }
+        
+        .report-box { padding: 35px; background: white; border: 1px solid #eee; }
+        .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: #f8f9fa; padding: 22px; border-radius: 10px; margin: 20px 0; font-size: 0.9rem; }
+        .profile-result { border-left: 5px solid var(--accent); background: #f0f7ff; padding: 22px; border-radius: 0 10px 10px 0; margin: 20px 0; }
+
+        /* Footer */
+        .footer { 
+            text-align: center; 
+            padding: 40px 20px; 
+            font-size: 0.85rem; 
+            color: #7f8c8d; 
+            line-height: 1.6;
+        }
+        .footer strong { color: var(--primary); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header class="main-header">
+        <h1>Evaluación de Orientación Vocacional</h1>
+        <div class="meta-tag">Universidad de Guanajuato</div>
+    </header>
+
+    <div id="start-screen">
+        <div class="card">
+            <h2 class="card-title">¿Por qué realizar este test?</h2>
+            <p>Este instrumento está basado en el Libro de Tutoría III de la UGTO y ha sido sistematizado para el curso de N.C. Kurt. Identificar tus áreas de interés es el primer paso para guiar tu futuro profesional con seguridad y propósito.</p>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Datos del Evaluado</h2>
+            <p style="font-size: 0.9rem; color: #7f8c8d; margin-bottom: 22px;">Ingresa tu información básica para generar tu reporte personalizado al finalizar.</p>
+            
+            <div class="input-group">
+                <label>Nombre Completo</label>
+                <input type="text" id="userName" placeholder="Nombres y Apellidos" required>
+            </div>
+            
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <div class="input-group" style="flex:1; min-width: 120px;">
+                    <label>Edad</label>
+                    <input type="number" id="userAge" placeholder="Años">
+                </div>
+                <div class="input-group" style="flex:2; min-width: 200px;">
+                    <label>Institución / Empresa</label>
+                    <input type="text" id="userOrg" placeholder="Nombre de tu entidad">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Correo Electrónico</label>
+                <input type="email" id="userEmail" placeholder="correo@ejemplo.com">
+            </div>
+
+            <button class="btn" onclick="initTest()">Iniciar Evaluación →</button>
+        </div>
+    </div>
+
+    <div id="test-section">
+        <div class="card" style="background: #eef7ff; border: 1px solid #d1e9ff; text-align: center;">
+            <strong>Instrucciones:</strong> Elige la opción que mejor describa tus gustos actuales. Responde con total honestidad.
+        </div>
+        <form id="quizForm">
+            <div id="questions-container"></div>
+            <button type="button" class="btn" onclick="showResults()">Finalizar y Procesar Reporte</button>
+        </form>
+    </div>
+
+    <div id="result-section">
+        <div id="capture-area" class="report-box">
+            <h2 style="color:var(--primary); border-bottom: 2px solid var(--accent); padding-bottom:12px; margin-top:0;">Reporte Individual de Intereses</h2>
+            
+            <div class="data-grid">
+                <div><strong>Evaluado:</strong> <span id="rName"></span></div>
+                <div><strong>Entidad:</strong> <span id="rOrg"></span></div>
+                <div><strong>Edad:</strong> <span id="rAge"></span> años</div>
+                <div><strong>Contacto:</strong> <span id="rEmail"></span></div>
+            </div>
+
+            <div id="rBody"></div>
+            
+            <div style="margin-top: 35px; display: flex; justify-content: space-between; font-size: 0.75rem; color: #95a5a6; border-top: 1px solid #eee; padding-top: 15px;">
+                <div>Sistematización: <strong>Julián Castro</strong></div>
+                <div>Fuente: UGTO (2012) | Curso N.C. Kurt</div>
+            </div>
+        </div>
+
+        <div style="margin-top: 25px; display: flex; gap: 12px; flex-wrap: wrap;">
+            <button class="btn" onclick="downloadPDF()" style="background:#e74c3c; flex:1; min-width: 150px;">Descargar PDF</button>
+            <button class="btn" onclick="exportExcel()" style="background:#27ae60; flex:1; min-width: 150px;">Exportar Excel</button>
+            <button class="btn" onclick="location.reload()" style="background:#7f8c8d; flex:1; min-width: 150px;">Reiniciar Test</button>
+        </div>
+    </div>
+
+    <footer class="footer">
+        © 2026 | Sistematización: Julián Castro | castrobarrosjulian@gmail.com
+    </footer>
+</div>
+
+<script>
+// Base de datos de preguntas
+const questions = [
+    { q: "1. Durante mi tiempo libre prefiero:", a: "Hacer dibujos y bosquejos", b: "Cuidar del jardín y las mascotas", c: "Construir modelos a escala", d: "Planificar con mis amigos sobre sus problemas personales", e: "Ayudar en la organización de la casa o el negocio familiar" },
+    { q: "2. Si tuviera la opción de tomar un curso extra por las tardes preferiría:", a: "Tomar clases de piano o guitarra", b: "Clases para hacer papel reciclado", c: "Tomar un curso de robótica", d: "Aprender primeros auxilios", e: "Inscribirme en un curso de finanzas personales" },
+    { q: "3. Mis materias preferidas en la escuela son:", a: "Actividades estéticas", b: "Biología o química", c: "Física y matemáticas", d: "Historia, ética y filosofía", e: "Geografía, estadística y ciencias sociales" },
+    { q: "4. Admiro mucho a:", a: "Los actores, cantantes y pintores", b: "Los científicos que crean nuevos medicamentos", c: "Los creadores de las nuevas redes de comunicación social", d: "Los médicos y enfermeras", e: "Los empresarios" },
+    { q: "5. Si tuviera la oportunidad, preferiría ser asistente de:", a: "Dibujante", b: "Investigador marino", c: "Ingeniero o constructor", d: "Maestro", e: "Funcionario de gobierno" },
+    { q: "6. En la televisión prefiero ver:", a: "Dibujos animados o visualmente llamativos", b: "Documentales sobre la flora y fauna microscópica", c: "Programas sobre los últimos avances tecnológicos", d: "Programas donde se comentan los problemas de otras personas", e: "Noticiarios sobre política y economía" },
+    { q: "7. Cuando pienso en el futuro me visualizo:", a: "Trabajando con instrumentos musicales o pinturas", b: "Trabajando con sustancias y microorganismos", c: "Trabajando con máquinas y materiales de construcción", d: "Trabajando con personas", e: "Trabajando con números y fórmulas" },
+    { q: "8. En mi opinión, es más digno de admiración quien:", a: "Crea obras artísticas o musicales para enriquecer la vida de los demás", b: "Se atreve a estudiar y manipular la naturaleza", c: "Logra crear un producto nuevo que facilita la vida diaria", d: "Dedica su tiempo a ayudar a otros", e: "Organiza todas las actividades que los demás llevarán a cabo" },
+    { q: "9. En un evento, mis actividades normalmente son:", a: "Diseñar el cartel y revisar la decoración", b: "Revisar que las instalaciones estén limpias y seguras", c: "Preparar el equipo de sonido que se usará", d: "Atender a los asistentes del evento", e: "Organizar a la gente, haciendo el presupuesto y/o juntando el dinero" },
+    { q: "10. Si tuviera que participar en la apertura de un nuevo negocio preferiría:", a: "Encargarme de la decoración y apariencia del lugar", b: "Estar al pendiente de que los productos alimenticios sean de calidad", c: "Inspeccionar los aparatos que se van a usar", d: "Recibir a los clientes", e: "Encargarme de llevar la contabilidad del negocio" },
+    { q: "11. Me gustan los libros o revistas sobre:", a: "Pintura, escultura, danza y diseño", b: "El funcionamiento del cuerpo humano", c: "Tecnología y herramientas", d: "Psicología y sociología", e: "Economía y política" },
+    { q: "12. En una gran empresa me sentiría más atraído por trabajar:", a: "En la decoración y ambientación del inmueble", b: "En el área de salud e higiene", c: "En el área de investigación", d: "En el departamento de recursos humanos", e: "En el departamento de contabilidad y administración" },
+    { q: "13. Preferiría conversar con:", a: "El fotógrafo de un periódico", b: "El jefe de médicos en un hospital de urgencias", c: "El ingeniero encargado de que funcione un edificio inteligente", d: "El reportero de un noticiero", e: "Un jefe delegacional o presidente municipal" },
+    { q: "14. En mi habitación hay sobre todo:", a: "Cuadros, fotografías y carteles llamativos", b: "Plantas, peces y recuerdos de paseos en la playa o la montaña", c: "Dispositivos de última tecnología vigente", d: "Recuerdos sentimentales de mis amigos más cercanos", e: "Artículos que he comprado con las ganancias de pequeñas ventas y negocios" },
+    { q: "15. Las exposiciones más interesantes son las de:", a: "Escultura o pintura", b: "Plantas y animales desconocidos hasta ahora", c: "Tecnología y novedades científicas", d: "Libros, métodos educativos y escuelas de idiomas", e: "Discusión de temas de política y economía actual" },
+    { q: "16. Me sentiría muy satisfecho si pudiera:", a: "Bailar profesionalmente", b: "Crear nuevas especies de plantas y animales", c: "Ser parte del equipo que construye el edificio más moderno de la zona", d: "Encontrar la cura para enfermedades actuales", e: "Lograr que un negocio obtenga altas ganancias" },
+    { q: "17. Me gustaría visitar:", a: "Un estudio de grabación de videos", b: "Un laboratorio donde se elaboran vacunas", c: "Una planta armadora de automóviles", d: "Una escuela de educación especial", e: "La casa de bolsa" },
+    { q: "18. Mis temas favoritos son:", a: "Las últimas tendencias en música, arte y moda", b: "Los avances en ecología y genética", c: "Lo más avanzado en tecnología", d: "Las nuevas terapias psicológicas", e: "La economía del país" },
+    { q: "19. En mis ratos libres me gusta:", a: "Tocar un instrumento musical", b: "Visitar zoológicos o jardines", c: "Aprender nuevos programas de computadora", d: "Ayudar a mis hermanos o sobrinos pequeños en sus tareas", e: "Organizar eventos o reuniones" },
+    { q: "20. Preferiría ser reconocido por:", a: "Ser un notable músico, pintor o escultor", b: "Mis aportaciones a los avances médicos", c: "Mis descubrimientos y aportaciones a la ingeniería y tecnología", d: "Mejorar las condiciones de vida de los más necesitados", e: "Mi capacidad para hacer buenos negocios y ganar dinero" },
+    { q: "21. Me gusta imaginar en:", a: "Videos y animaciones más llamativas que me gustaría hacer", b: "Mi próxima visita a un paisaje natural", c: "Como serán las casas del futuro", d: "Ayudar a otras personas en sus problemas", e: "La manera más efectiva de hacer dinero" },
+    { q: "22. Me sentiría orgulloso si pudiera:", a: "Ser un artista de renombre", b: "Ser un científico de renombre", c: "Ser un arquitecto de renombre", d: "Ser un benefactor social de renombre", e: "Ser un político de renombre" },
+    { q: "23. Si tuviera que trabajar medio tiempo me gustaría:", a: "Trabajar en un teatro o museo", b: "Trabajar en el mar, en las montañas o el desierto", c: "Trabajar en una fábrica", d: "Trabajar en una escuela", e: "Trabajar en una oficina" },
+    { q: "24. La frase que más me llama la atención es:", a: "La combinación de colores y texturas artísticas", b: "La investigación genética traerá nuevos descubrimientos", c: "Para mejorar la eficiencia electrónica hay que estudiar materiales", d: "Es necesario promover la participación activa del alumno", e: "Es necesario llegar a nuevos acuerdos económicos" },
+    { q: "25. Me parecería interesante entrevistar a un:", a: "Escultor", b: "Meteorólogo", c: "Astrónomo", d: "Guía de turistas", e: "Economista" },
+    { q: "26. Cuando debo aprender algo nuevo prefiero:", a: "Utilizar sonidos y movimientos", b: "Hacer un análisis minucioso de la información", c: "Tocar y revisar directamente los objetos", d: "Comentar los temas con otros compañeros", e: "Organizar lo aprendido en esquemas y gráficas" },
+    { q: "27. Creo que me sentiría más motivado si estuviera en:", a: "Un teatro o estudio de grabación", b: "Un laboratorio", c: "Una fábrica", d: "Un lugar lleno de personas", e: "Una oficina" },
+    { q: "28. Para mi lo natural es:", a: "Dibujar, pintar o componer música", b: "Investigar la naturaleza", c: "Arreglar fallas técnicas", d: "Ayudar a la gente", e: "Organizar eventos" }
+];
+
+let userData = {};
+let finalCounts = {};
+
+function initTest() {
+    userData = {
+        name: document.getElementById('userName').value,
+        age: document.getElementById('userAge').value,
+        org: document.getElementById('userOrg').value,
+        email: document.getElementById('userEmail').value
+    };
+
+    if(!userData.name) { alert("Por favor, ingresa tu nombre completo."); return; }
+
+    document.getElementById('start-screen').style.display = 'none';
+    document.getElementById('test-section').style.display = 'block';
+
+    const container = document.getElementById('questions-container');
+    questions.forEach((item, i) => {
+        const div = document.createElement('div');
+        div.className = 'question-card';
+        div.innerHTML = `
+            <span class="question-text">${item.q}</span>
+            <div class="options">
+                ${['a','b','c','d','e'].map(l => `
+                    <label class="option">
+                        <input type="radio" name="q${i}" value="${l.toUpperCase()}" required> ${item[l]}
+                    </label>
+                `).join('')}
+            </div>
+        `;
+        container.appendChild(div);
+    });
+    window.scrollTo(0,0);
+}
+
+function showResults() {
+    const form = document.getElementById('quizForm');
+    const fd = new FormData(form);
+    const counts = { A:0, B:0, C:0, D:0, E:0 };
+    let answered = 0;
+
+    for (let v of fd.values()) { counts[v]++; answered++; }
+
+    if(answered < 28) { alert("Por favor, responde todas las preguntas antes de continuar."); return; }
+    
+    finalCounts = counts;
+    const max = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+    
+    const areas = {
+        A: { t: "Perfil Creativo - Artístico", d: "Inclinación natural hacia el diseño, la estética y la expresión de emociones a través del arte y la música.", c: "Diseño Gráfico, Arquitectura, Artes Visuales, Producción Musical." },
+        B: { t: "Perfil Biológico - Ecológico", d: "Interés profundo en el estudio de los seres vivos, la naturaleza y la investigación científica orgánica.", c: "Biología, Medicina Veterinaria, Agronomía, Ciencias Ambientales." },
+        C: { t: "Perfil Tecnológico - Físico", d: "Capacidad para el análisis técnico, resolución de problemas lógicos y construcción de soluciones tecnológicas.", c: "Ingenierías, Mecatrónica, Desarrollo de Software, Robótica." },
+        D: { t: "Perfil Social - Humanista", d: "Fuerte vocación de servicio y compromiso con el bienestar humano, la salud y la resolución de conflictos sociales.", c: "Psicología, Medicina, Educación, Derecho, Sociología." },
+        E: { t: "Perfil Administrativo - Económico", d: "Capacidad de liderazgo, gestión estratégica de recursos y visión emprendedora en el mundo de los negocios.", c: "Administración de Empresas, Economía, Contaduría, Finanzas." }
+    };
+
+    document.getElementById('rName').innerText = userData.name;
+    document.getElementById('rAge').innerText = userData.age || "--";
+    document.getElementById('rOrg').innerText = userData.org || "Independiente";
+    document.getElementById('rEmail').innerText = userData.email || "--";
+
+    const res = areas[max];
+    document.getElementById('rBody').innerHTML = `
+        <div class="profile-result">
+            <h3 style="margin:0; color:var(--accent); font-size:1.4rem;">${res.t}</h3>
+            <p style="margin:12px 0; color:#444;">${res.d}</p>
+            <strong>Carreras sugeridas:</strong> <span style="color:#2c3e50;">${res.c}</span>
+        </div>
+        <p style="margin-top:25px; font-size:0.85rem; color:#666;">
+            <strong>Distribución de puntaje por área:</strong><br>
+            A: ${counts.A} | B: ${counts.B} | C: ${counts.C} | D: ${counts.D} | E: ${counts.E}
+        </p>
+    `;
+
+    document.getElementById('test-section').style.display = 'none';
+    document.getElementById('result-section').style.display = 'block';
+    window.scrollTo(0,0);
+}
+
+async function downloadPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p', 'pt', 'a4');
+    await html2canvas(document.querySelector("#capture-area"), { scale: 2 }).then(canvas => {
+        const img = canvas.toDataURL('image/png');
+        const w = doc.internal.pageSize.getWidth();
+        doc.addImage(img, 'PNG', 0, 0, w, (canvas.height * w) / canvas.width);
+        doc.save(`Reporte_Vocacional_${userData.name.replace(/\s+/g, '_')}.pdf`);
+    });
+}
+
+function exportExcel() {
+    const data = [{
+        Nombre: userData.name, Edad: userData.age, Institucion: userData.org, Email: userData.email,
+        A: finalCounts.A, B: finalCounts.B, C: finalCounts.C, D: finalCounts.D, E: finalCounts.E,
+        Metodología: "UGTO (2012)", Sistematización: "Julián Castro"
+    }];
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Resultados");
+    XLSX.writeFile(wb, `Resultado_${userData.name.replace(/\s+/g, '_')}.xlsx`);
+}
+</script>
+</body>
+</html>
