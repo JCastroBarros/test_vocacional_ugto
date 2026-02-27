@@ -2,7 +2,7 @@
 
 Este proyecto es una **sistematización digital** del Test de Orientación e Intereses basado en el *Libro de Tutoría III de la Universidad de Guanajuato (2012)*. Fue desarrollado como un aporte de valor para la comunidad del curso **"Lectura Rápida: Comprende Mejor, Recuerda Más"** de **N.C. Kurt**. https://www.udemy.com/share/101WnG3@JGprDKoSgXp0QqjFkfPDUtqAT6ht3w2GMDLukTZyKOc0eGVCS1V3onrjc-rWPeem3w==/
 
-🔗 **Prueba el test aquí:** [Haz clic para abrir la herramienta]([https://jcastrobarros.github.io/test_vocacional_ugto/])
+🔗 **Prueba el test aquí:** [Haz clic para abrir la herramienta](https://jcastrobarros.github.io/test_vocacional_ugto/)
 
 ## ✨ Características Principales
 - **Interfaz Intuitiva:** Flujo de usuario limpio y profesional.
